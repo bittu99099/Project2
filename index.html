@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pocket Explorer — Budget Travel</title>
+  <style>
+    /* ========= RESET & BASE ========== */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:Inter,system-ui,Arial,sans-serif;color:#111}
+    a{color:inherit;text-decoration:none}
+
+    /* ========= LOGIN LAYOUT ========== */
+    body.login-active{
+      background: linear-gradient(120deg, rgba(7,37,77,0.7), rgba(3,106,106,0.45)),
+                  url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=60') center/cover fixed;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .login-card{
+      width:360px;background:rgba(255,255,255,0.98);border-radius:12px;
+      box-shadow:0 10px 30px rgba(10,10,20,0.2);padding:26px;
+    }
+    .logo{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+    .logo .badge{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#ff8a65,#ffb86b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    h2{font-size:20px;margin-bottom:6px}
+    p.muted{color:#666;font-size:13px;margin-bottom:18px}
+
+    .field{margin-bottom:12px}
+    input[type="text"],input[type="password"]{
+      width:100%;padding:11px;border-radius:8px;border:1px solid #e6e8ec;font-size:14px;
+    }
+    .btn{
+      display:inline-block;padding:10px 14px;border-radius:10px;background:#2b8cff;color:#fff;font-weight:600;border:none;cursor:pointer;
+    }
+    .small{font-size:13px;color:#666}
+
+    /* ========= APP LAYOUT ========= */
+    .app{
+      min-height:100vh;display:flex;flex-direction:column;
+      background:linear-gradient(180deg,#f6fbff,#ffffff);
+    }
+    header.navbar{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid rgba(20,20,40,0.04);
+      background:#fff;position:sticky;top:0;z-index:50;
+    }
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand .badge {width:44px;height:44px;border-radius:8px;background:linear-gradient(135deg,#ff8a65,#ffb86b);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+    nav.main-nav{display:flex;gap:12px;align-items:center}
+    nav.main-nav a{padding:8px 12px;border-radius:8px;font-weight:600;color:#16325c}
+    nav.main-nav a.active{background:rgba(40,120,255,0.12)}
+    .search-inline{display:flex;gap:8px;align-items:center}
+    .search-inline input{padding:8px 10px;border-radius:8px;border:1px solid #e6e8ec;width:260px}
+
+    .container{
+      max-width:1100px;margin:28px auto;padding:0 18px;flex:1;
+    }
+
+    .hero{
+      display:flex;gap:24px;align-items:center;background:#fff;border-radius:14px;padding:18px;box-shadow:0 8px 22px rgba(20,30,80,0.04);
+    }
+    .hero-left{flex:1}
+    .hero-right{width:320px;border-radius:10px;overflow:hidden}
+    .hero h1{font-size:26px;margin-bottom:8px}
+    .hero p{color:#555;margin-bottom:12px}
+
+    /* cards */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:18px}
+    .card{background:#fff;padding:14px;border-radius:12px;box-shadow:0 6px 18px rgba(20,30,80,0.04)}
+    .card img{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+
+    /* destination detail */
+    .detail{display:flex;gap:18px;align-items:flex-start}
+    .detail img{width:48%;border-radius:10px;height:320px;object-fit:cover}
+    .detail .meta{flex:1}
+    .badge-tag{display:inline-block;padding:6px 8px;border-radius:8px;background:#eef6ff;color:#1b5fe2;font-weight:700;margin-bottom:10px}
+
+    /* flights/hotels lists */
+    .list-row{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;border:1px solid #f0f3f8}
+    .muted-small{color:#6a7480;font-size:13px}
+
+    /* contact */
+    .contact-form{max-width:640px}
+    textarea{width:100%;min-height:120px;padding:10px;border-radius:10px;border:1px solid #e6e8ec}
+
+    /* footer */
+    footer{padding:18px;text-align:center;color:#666;font-size:14px}
+
+    /* responsive */
+    @media (max-width:900px){
+      .hero{flex-direction:column}
+      .hero-right{width:100%}
+      .search-inline input{width:140px}
+      .detail{flex-direction:column}
+      .detail img{width:100%;height:260px}
+    }
+
+  </style>
+</head>
+<body class="login-active">
+  <!-- ========== LOGIN (FIRST SCREEN) ========== -->
+  <div id="loginScreen" class="login-card" role="dialog" aria-modal="true">
+    <div class="logo">
+      <div class="badge">PE</div>
+      <div>
+        <h2>Pocket Explorer</h2>
+        <div class="small muted">Budget travel ideas — explore smartly</div>
+      </div>
+    </div>
+
+    <p class="muted">Login karo taaki tumhare liye personalised suggestions show ho sake. (Demo: koi bhi username/password chal jaayega.)</p>
+
+    <div class="field">
+      <label class="small">Username</label>
+      <input id="username" type="text" placeholder="Apna naam daalo">
+    </div>
+    <div class="field">
+      <label class="small">Password</label>
+      <input id="password" type="password" placeholder="Password">
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+      <button id="loginBtn" class="btn">Login</button>
+      <div class="small muted">or <a id="demoLogin" href="#">Try demo</a></div>
+    </div>
+
+    <hr style="margin:16px 0;border:none;height:1px;background:#f0f3f8">
+
+    <div class="small muted">Built with ❤ for Pocket-friendly journeys.</div>
+  </div>
+
+  <!-- ========== APP (HIDDEN UNTIL LOGIN) ========== -->
+  <div id="app" class="app" style="display:none">
+    <header class="navbar">
+      <div class="brand">
+        <div class="badge">PE</div>
+        <div>
+          <div style="font-weight:800">Pocket Explorer</div>
+          <div style="font-size:12px;color:#666">Budget travel ideas</div>
+        </div>
+      </div>
+
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#" data-route="home" class="active">Home</a>
+        <a href="#" data-route="flights">Flights</a>
+        <a href="#" data-route="hotels">Hotels</a>
+        <a href="#" data-route="destinations">Destinations</a>
+        <a href="#" data-route="contact">Contact</a>
+      </nav>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="search-inline">
+          <input id="topSearch" placeholder="Search destination (e.g. Goa)" />
+          <button id="topSearchBtn" class="btn" style="padding:8px 10px">Search</button>
+        </div>
+        <button id="logoutBtn" style="background:transparent;border:1px solid #e6e8ec;padding:8px 10px;border-radius:8px">Logout</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="homeView">
+        <div class="hero">
+          <div class="hero-left">
+            <div class="badge-tag">Budget Friendly</div>
+            <h1>Travel smart. Travel more.</h1>
+            <p>Search destinations, check sample flights & hotels, aur pao estimated budget for your trip.</p>
+            <div style="margin-top:12px">
+              <input id="homeSearch" placeholder="Search a destination, e.g. Bali" style="padding:10px;border-radius:10px;border:1px solid #e6e8ec;width:70%">
+              <button id="homeSearchBtn" class="btn">Search</button>
+            </div>
+          </div>
+          <div class="hero-right">
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=60" alt="travel" style="width:100%;height:100%;object-fit:cover">
+          </div>
+        </div>
+
+        <h3 style="margin-top:20px">Popular Destinations</h3>
+        <div id="popularGrid" class="grid" aria-live="polite"></div>
+      </section>
+
+      <section id="flightsView" style="display:none">
+        <h2>Flights — Sample offers</h2>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div class="card list-row">
+            <div>
+              <div style="font-weight:700">Delhi → Goa</div>
+              <div class="muted-small">Nonstop • 2h 15m</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₹3,200</div>
+              <div class="muted-small">Round trip (estimate)</div>
+            </div>
+          </div>
+
+          <div class="card list-row">
+            <div>
+              <div style="font-weight:700">Mumbai → Kerala (Kochi)</div>
+              <div class="muted-small">1 stop • 3h 30m</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₹4,500</div>
+              <div class="muted-small">Round trip (estimate)</div>
+            </div>
+          </div>
+
+          <div class="card list-row">
+            <div>
+              <div style="font-weight:700">Bengaluru → Andaman</div>
+              <div class="muted-small">1 stop • 4h 10m</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₹9,500</div>
+              <div class="muted-small">Round trip (estimate)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="hotelsView" style="display:none">
+        <h2>Hotels — Sample stays</h2>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+          <div class="card list-row">
+            <div>
+              <div style="font-weight:700">Seaside Resort — Goa</div>
+              <div class="muted-small">Free cancellation • Breakfast included</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₹2,300 / night</div>
+              <div class="muted-small">2-star — Budget</div>
+            </div>
+          </div>
+
+          <div class="card list-row">
+            <div>
+              <div style="font-weight:700">City Comfort — Delhi</div>
+              <div class="muted-small">Central location</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800">₹1,600 / night</div>
+              <div class="muted-small">3-star — Budget</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="destinationsView" style="display:none">
+        <h2>Destinations</h2>
+        <div id="destGrid" class="grid" style="margin-top:12px"></div>
+      </section>
+
+      <section id="destinationDetailView" style="display:none">
+        <button id="backToList" class="btn" style="margin-bottom:12px;background:#eef6ff;color:#1352d6">← Back</button>
+        <div id="detailContent"></div>
+      </section>
+
+      <section id="contactView" style="display:none">
+        <h2>Contact</h2>
+        <div class="card contact-form">
+          <p class="muted-small">Koi bhi sawal ho to message bhejo — hum jald reply karenge (demo site).</p>
+          <div style="margin-top:8px">
+            <input placeholder="Your name" style="padding:10px;border-radius:8px;border:1px solid #e6e8ec;width:100%;margin-bottom:8px">
+            <input placeholder="Email" style="padding:10px;border-radius:8px;border:1px solid #e6e8ec;width:100%;margin-bottom:8px">
+            <textarea placeholder="Message"></textarea>
+            <div style="margin-top:8px"><button class="btn">Send message</button></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer>
+      © Pocket Explorer — budget travel ideas • Built for demo
+    </footer>
+  </div>
+
+  <script>
+    /********** SAMPLE DATA **********/
+    const DESTINATIONS = [
+      {
+        id: 'goa',
+        name: 'Goa',
+        country: 'India',
+        summary: 'Beaches, parties, seafood and sun — perfect for a short budget getaway.',
+        description: 'Goa offers clear beaches, Portuguese architecture, lively markets and delicious seafood. Ideal for 3–5 day trips.',
+        budget_estimate: '₹6,000 - ₹12,000 per person (3 days, budget)',
+        images: [
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=1200&q=60',
+          'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=1200&q=60'
+        ],
+        best_time: 'November to February'
+      },
+      {
+        id: 'manali',
+        name: 'Manali',
+        country: 'India',
+        summary: 'Mountain town in Himalayas — snow, rivers and adventure sports.',
+        description: 'Manali is great for nature, trekking, paragliding and cozy cafes. Good for 4–6 day stays.',
+        budget_estimate: '₹8,000 - ₹16,000 per person (4 days, budget)',
+        images: [
+          'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1200&q=60'
+        ],
+        best_time: 'October to March'
+      },
+      {
+        id: 'bali',
+        name: 'Bali',
+        country: 'Indonesia',
+        summary: 'Island vibes, rice terraces, surfing and temples.',
+        description: 'Bali mixes beaches and culture — great for both backpackers and couples. Visa and travel rules apply.',
+        budget_estimate: '₹30,000 - ₹55,000 per person (5 days, budget)',
+        images: [
+          'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=60'
+        ],
+        best_time: 'April to October'
+      },
+      {
+        id: 'kerala',
+        name: 'Kerala (Munnar)',
+        country: 'India',
+        summary: 'Tea gardens, hills, and serene backwaters nearby.',
+        description: 'Munnar is perfect for a relaxed nature trip: tea estates, viewpoints and gentle hikes.',
+        budget_estimate: '₹7,000 - ₹14,000 per person (3 days, budget)',
+        images: [
+          'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=60'
+        ],
+        best_time: 'September to March'
+      }
+    ];
+
+    /********** AUTH (client-side demo) **********/
+    const loginScreen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+
+    function showLogin(show=true){
+      if(show){
+        document.body.classList.add('login-active');
+        loginScreen.style.display = 'block';
+        app.style.display = 'none';
+      } else {
+        document.body.classList.remove('login-active');
+        loginScreen.style.display = 'none';
+        app.style.display = 'flex';
+      }
+    }
+
+    // check stored session
+    if(localStorage.getItem('pocket_logged_in') === '1'){
+      showLogin(false);
+      initApp();
+    } else {
+      showLogin(true);
+    }
+
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      const u = document.getElementById('username').value.trim();
+      const p = document.getElementById('password').value.trim();
+      if(u.length === 0 || p.length === 0){
+        alert('Username aur password dono daalo (demo website).');
+        return;
+      }
+      // demo: accept any non-empty credentials
+      localStorage.setItem('pocket_logged_in','1');
+      localStorage.setItem('pocket_user', u);
+      showLogin(false);
+      initApp();
+    });
+
+    document.getElementById('demoLogin').addEventListener('click', (e)=>{
+      e.preventDefault();
+      localStorage.setItem('pocket_logged_in','1');
+      localStorage.setItem('pocket_user','Guest');
+      showLogin(false);
+      initApp();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      localStorage.removeItem('pocket_logged_in');
+      localStorage.removeItem('pocket_user');
+      // show login screen again
+      showLogin(true);
+      // scroll to top
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+
+    /********** APP NAV & VIEWS **********/
+    const navLinks = document.querySelectorAll('nav.main-nav a');
+    function setActiveRoute(route){
+      navLinks.forEach(a => a.classList.toggle('active', a.dataset.route === route));
+      // hide all views
+      document.querySelectorAll('main .container > section').forEach(s => s.style.display = 'none');
+      // show the relevant
+      if(route === 'home') document.getElementById('homeView').style.display = 'block';
+      if(route === 'flights') document.getElementById('flightsView').style.display = 'block';
+      if(route === 'hotels') document.getElementById('hotelsView').style.display = 'block';
+      if(route === 'destinations') document.getElementById('destinationsView').style.display = 'block';
+      if(route === 'contact') document.getElementById('contactView').style.display = 'block';
+      // hide detail view on route change
+      document.getElementById('destinationDetailView').style.display = 'none';
+    }
+
+    navLinks.forEach(a => {
+      a.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const r = a.dataset.route;
+        setActiveRoute(r);
+      });
+    });
+
+    // Top search
+    document.getElementById('topSearchBtn').addEventListener('click', ()=>{
+      const q = document.getElementById('topSearch').value.trim();
+      if(q) showDestinationByQuery(q);
+    });
+    document.getElementById('homeSearchBtn').addEventListener('click', ()=>{
+      const q = document.getElementById('homeSearch').value.trim();
+      if(q) showDestinationByQuery(q);
+    });
+
+    // Back button on detail
+    document.getElementById('backToList').addEventListener('click', ()=>{
+      document.getElementById('destinationDetailView').style.display='none';
+      setActiveRoute('destinations');
+    });
+
+    /********** RENDERING **********/
+    function renderPopular(){
+      const grid = document.getElementById('popularGrid');
+      grid.innerHTML = '';
+      // show first 3
+      DESTINATIONS.slice(0,3).forEach(d=>{
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `
+          <img src="${d.images[0]}" alt="${d.name}">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:800">${d.name}</div>
+              <div class="muted-small">${d.country} • ${d.best_time}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="color:#1b5fe2;font-weight:800">${d.budget_estimate.split(' ')[0]}</div>
+              <div class="muted-small">estimated</div>
+            </div>
+          </div>
+          <p style="margin-top:8px;color:#555">${d.summary}</p>
+          <div style="margin-top:10px"><button class="btn" data-id="${d.id}">View</button></div>
+        `;
+        card.querySelector('button').addEventListener('click', ()=> showDestinationDetail(d.id));
+        grid.appendChild(card);
+      });
+    }
+
+    function renderDestinationsGrid(){
+      const g = document.getElementById('destGrid');
+      g.innerHTML = '';
+      DESTINATIONS.forEach(d=>{
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `
+          <img src="${d.images[0]}" alt="${d.name}">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:800">${d.name}</div>
+              <div class="muted-small">${d.country}</div>
+            </div>
+            <div style="text-align:right"><div style="font-weight:800">${d.budget_estimate.split(' ')[0]}</div></div>
+          </div>
+          <p style="margin-top:8px;color:#555">${d.summary}</p>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn" data-id="${d.id}">Details</button>
+            <button style="padding:8px;border-radius:8px;border:1px solid #e6e8ec" data-id="${d.id}" class="preview">Preview</button>
+          </div>
+        `;
+        card.querySelector('button.btn').addEventListener('click', ()=> showDestinationDetail(d.id));
+        card.querySelector('.preview').addEventListener('click', ()=>{
+          alert('${d.name} — ${d.summary}\\nBest time: ${d.best_time}\\nEstimated: ${d.budget_estimate}');
+        });
+        g.appendChild(card);
+      });
+    }
+
+    function showDestinationDetail(id){
+      const d = DESTINATIONS.find(x=>x.id===id);
+      if(!d){ alert('Destination not found'); return; }
+      const detail = document.getElementById('detailContent');
+      detail.innerHTML = `
+        <div class="detail card">
+          <img src="${d.images[0]}" alt="${d.name}">
+          <div class="meta">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start">
+              <div>
+                <div style="font-size:20px;font-weight:800">${d.name}, ${d.country}</div>
+                <div class="muted-small">${d.best_time} • ${d.budget_estimate}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-weight:800;color:#1b5fe2">Approx. {budget}</div>
+              </div>
+            </div>
+            <p style="margin-top:12px;color:#333">${d.description}</p>
+            <h4 style="margin-top:12px">How to plan (sample)</h4>
+            <ul style="margin-top:8px;color:#555">
+              <li>Stay: 2-4 nights depending on activities</li>
+              <li>Cost: ${d.budget_estimate}</li>
+              <li>Top activities: Beaches, local food, sightseeing</li>
+            </ul>
+            <div style="margin-top:12px;display:flex;gap:10px">
+              <button id="bookFlight" class="btn">Check Flights</button>
+              <button id="bookHotel" style="padding:10px;border-radius:10px;border:1px solid #e6e8ec">Find Hotels</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="card">
+          <h4>More images</h4>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            ${d.images.map(img => '<img src="${img}" style="width:180px;height:110px;object-fit:cover;border-radius:8px">').join('')}
+          </div>
+        </div>
+      `.replace('{budget}', d.budget_estimate);
+
+      // wire up quick actions
+      document.getElementById('bookFlight').addEventListener('click', ()=>{
+        setActiveRoute('flights');
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+      document.getElementById('bookHotel').addEventListener('click', ()=>{
+        setActiveRoute('hotels');
+        window.scrollTo({top:0,behavior:'smooth'});
+      });
+
+      // show detail view + hide others
+      document.getElementById('destinationDetailView').style.display = 'block';
+      document.getElementById('homeView').style.display='none';
+      document.getElementById('destinationsView').style.display='none';
+      document.getElementById('flightsView').style.display='none';
+      document.getElementById('hotelsView').style.display='none';
+      document.getElementById('contactView').style.display='none';
+      // scroll to detail
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+
+    function showDestinationByQuery(q){
+      q = q.toLowerCase();
+      const found = DESTINATIONS.find(d => d.name.toLowerCase() === q || d.id === q || d.name.toLowerCase().includes(q));
+      if(found){
+        showDestinationDetail(found.id);
+      } else {
+        // show list filtered
+        const matches = DESTINATIONS.filter(d => d.name.toLowerCase().includes(q) || d.summary.toLowerCase().includes(q));
+        if(matches.length===1){
+          showDestinationDetail(matches[0].id);
+        } else if(matches.length>1){
+          setActiveRoute('destinations');
+          renderDestinationsGrid();
+          // highlight matches by scrolling to first match card
+          setTimeout(()=>{
+            const firstBtn = document.querySelector('#destGrid .card button[data-id="${matches[0].id}"]');
+            if(firstBtn) firstBtn.scrollIntoView({behavior:'smooth',block:'center'});
+          }, 120);
+        } else {
+          alert('Koi destination nahi mila for "'+q+'". Try: Goa, Manali, Bali, Kerala');
+        }
+      }
+    }
+
+    /********** INIT **********/
+    function initApp(){
+      renderPopular();
+      renderDestinationsGrid();
+      setActiveRoute('home');
+
+      // welcome
+      const user = localStorage.getItem('pocket_user') || 'Traveler';
+      // small greeting (not intrusive)
+      setTimeout(()=> {
+        console.log('Welcome, '+user);
+      }, 600);
+    }
+
+    // initialize if already logged-in
+    if(localStorage.getItem('pocket_logged_in')==='1'){
+      // already handled above
+    }
+
+    // small accessibility: enter on top search
+    document.getElementById('topSearch').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('topSearchBtn').click() });
+    document.getElementById('homeSearch').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('homeSearchBtn').click() });
+
+  </script>
+</body>
+</html>
